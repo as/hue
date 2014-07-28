@@ -6,7 +6,11 @@ import (
 )
 
 import (
+<<<<<<< HEAD
 	hue "github.com/as/hue"
+=======
+	"github.com/as/hue"
+>>>>>>> 0746d732461f22cf71c4582b6a32841b9fcf82cf
 )
 
 func main() {
