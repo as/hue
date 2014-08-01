@@ -1,12 +1,12 @@
 package hue
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestEncodeDecode(t *testing.T) {
-	var h Hue
+	h := New(Default, Default)
 
 	testInputs := []string{
 		"The quick brown fox jumped over the lazy dog", // All letters of the alphabet
@@ -24,13 +24,13 @@ func TestEncodeDecode(t *testing.T) {
 	for _, u := range testInputs {
 		for _, v := range Names {
 			for _, w := range Names {
-				hs := Encode(&h, u)
+				hs := Encode(h, u)
 				if u != hs.Decode() {
 					t.Log(fmt.Sprintf("%s != %s", u, hs.Decode()))
 					t.Fail()
 				}
-				h.Fg = w
-				h.Bg = v
+				h.SetFg(w)
+				h.SetBg(v)
 			}
 		}
 	}

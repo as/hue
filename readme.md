@@ -5,26 +5,21 @@ Package hue implements terminal _colorization_ via ECMA-40 color codes. It provi
 ###Quick tour
 A Hue object provides a wrapper for output functions, such as fmt.Println. 
 ```
-red := hue.Hue{
-		Fg: hue.Red,
-		Bg: hue.White,
-}
+// Create a hue with a white foreground and red background
+red := hue.New(hue.White, hue.Red)
 
-red.Println("Red string is red /w white background")
-
-```
-A Writer
-object allows an io.Writer to bind to a Hue object for colored writes.
+// Print the red string with a hue object
+red.Println("Red")
 
 ```
-green := hue.Hue{hue.Green, hue.Default}
-blue := hue.Hue{hue.Blue, hue.Default}
+A Writer object allows an io.Writer to bind to a Hue object for colored writes.
 
-hw := hue.NewWriter(os.Stdin, &green)
-hw.Write([]byte("Write some green bytes to stdout\n"))
+```
+green := hue.New(hue.Green, hue.Default)
 
-hw.SetHue(&blue)
-hw.WriteString("Write this blue string to stdout\n")
+// Print a green string with a hue.Writer
+hw := hue.NewWriter(os.Stdout, green)
+hw.WriteString("Green\n")
 
 ```
 
@@ -39,6 +34,23 @@ fmt.Printf("Colored, even with fmt.Printf(): %s\n", hs)
 // A String object can be decoded to a builtin string using Decode
 fmt.Printf("Uncolored: %s\n", hs.Decode())
 
+```
+
+To automatically colorize output, create a hue.RegexpWriter
+and add coloring rules with regular expressions.
+```
+	re := hue.NewRegexpWriter(os.Stdout)
+
+	alarmState := `
+Weather control device online
+Snow storage silo: Warning Capacity Exceeded
+Snow storage silo: Danger: Pressure over limit
+`
+	re.AddRuleStringPOSIX(green, ".*online.*")
+	re.AddRuleStringPOSIX(yellow, "Warning")
+	re.AddRuleStringPOSIX(red, ".*Danger.*")
+
+	re.WriteString(alarmState)
 ```
 
 ### Full example
