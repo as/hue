@@ -47,12 +47,12 @@ var Names = map[string]int{
 }
 
 // SetHue sets the Writer's hue
-func (w *Writer) SetHue(h *hue) {
-	w.hue = h
+func (w *Writer) SetHue(h *Hue) {
+	w.Hue = h
 }
 
 // NewWriter returns a new Writer with the hue 'h'
-func NewWriter(w io.Writer, h *hue) *Writer {
+func NewWriter(w io.Writer, h *Hue) *Writer {
 	n := new(Writer)
 	n.wrapped = w
 	n.SetHue(h)
@@ -73,7 +73,7 @@ func (w Writer) WriteString(s string) (int, error) {
 
 // Writer implements colorization for an underlying io.Writer object
 type Writer struct {
-	*hue
+	*Hue
 	wrapped io.Writer
 }
 
@@ -82,31 +82,31 @@ type Writer struct {
 type String string
 
 // New creates a new hue object with foreground and background colors specified.
-func New(fg, bg int) *hue {
-	h := new(hue)
+func New(fg, bg int) *Hue {
+	h := new(Hue)
 	h.SetFg(fg)
 	h.SetBg(bg)
 	return h
 }
 
-func (h *hue) SetFg(c int) {
+func (h *Hue) SetFg(c int) {
 	h.fg = c
 }
 
-func (h *hue) SetBg(c int) {
+func (h *Hue) SetBg(c int) {
 	h.bg = c + 10
 }
 
-func (h *hue) Fg() int {
+func (h *Hue) Fg() int {
 	return h.fg
 }
 
-func (h *hue) Bg() int {
+func (h *Hue) Bg() int {
 	return h.bg
 }
 
-// hue holds the foreground color and background color as integers
-type hue struct {
+// Hue holds the foreground color and background color as integers
+type Hue struct {
 	fg, bg int
 }
 
@@ -123,26 +123,26 @@ func (hs String) Decode() (s string) {
 
 // Encode encapsulates interface a's string representation
 // with the ECMA-40 color codes stored in the hue structure.
-func Encode(h *hue, a interface{}) String {
+func Encode(h *Hue, a interface{}) String {
 	return String(fmt.Sprintf(ASCIIFmtReset, h.Fg(), h.Bg(), a))
 }
 // Sprintf behaves like fmt.Sprintf, except it colorizes the output String
-func (h *hue) Sprintf(format string, a interface{}) String {
+func (h *Hue) Sprintf(format string, a interface{}) String {
 	return String(fmt.Sprintf(string(Encode(h, format)), a))
 }
 
 // Printf behaves like fmt.Printf, except it colorizes the output
-func (h *hue) Printf(format string, a interface{}) {
+func (h *Hue) Printf(format string, a interface{}) {
 	fmt.Printf(string(Encode(h, format)), a)
 }
 
 // Print behaves like fmt.Print, except it colorizes the output
-func (h *hue) Print(a interface{}) {
+func (h *Hue) Print(a interface{}) {
 	fmt.Print(Encode(h, a))
 }
 
 // Println behaves like fmt.Println, except it colorizes the output
-func (h *hue) Println(a interface{}) {
+func (h *Hue) Println(a interface{}) {
 	fmt.Println(Encode(h, a))
 }
 
@@ -154,7 +154,7 @@ type RegexpWriter struct {
 }
 
 type rule struct {
-	*hue
+	*Hue
 	*regexp.Regexp
 }
 
@@ -167,20 +167,20 @@ func NewRegexpWriter(w io.Writer) *RegexpWriter {
 
 // AddRuleStringPOSIX binds a hue to the POSIX regexp in the string 's'.
 // Similar to AddRule, except the caller passes in an uncompiled POSIX regexp.
-func (w *RegexpWriter) AddRuleStringPOSIX(h *hue, s string) {
+func (w *RegexpWriter) AddRuleStringPOSIX(h *Hue, s string) {
 	re := regexp.MustCompilePOSIX(s)
 	w.AddRule(h, re)
 }
 
 // AddRuleString binds a hue to the regexp in the string 's'.
 // Similar to AddRule, except the caller passes in an uncompiled regexp.
-func (w *RegexpWriter) AddRuleString(h *hue, s string) {
+func (w *RegexpWriter) AddRuleString(h *Hue, s string) {
 	re := regexp.MustCompile(s)
 	w.AddRule(h, re)
 }
 
 // AddRule binds a hue to a regular expression.
-func (w *RegexpWriter) AddRule(h *hue, re *regexp.Regexp) {
+func (w *RegexpWriter) AddRule(h *Hue, re *regexp.Regexp) {
 	//w.rules.PushBack( rule{h, re} )
 	w.rules = append(w.rules, rule{h, re})
 }
@@ -208,14 +208,14 @@ func (w RegexpWriter) WriteString(s string) (n int, err error) {
 // to the underlying writer object.
 func (w RegexpWriter) Write(p []byte) (n int, err error) {
 	huemap := make([]byte, len(p))
-	rulemap := make([]*hue, len(w.rules)+1)
-	rulemap[0] = &hue{}
+	rulemap := make([]*Hue, len(w.rules)+1)
+	rulemap[0] = &Hue{}
 
 	for i := 1; i < len(rulemap); i++ {
 		r := w.rules[i-1]
 		x := r.FindAllIndex(p, -1)
 
-		rulemap[i] = r.hue
+		rulemap[i] = r.Hue
 		for _, w := range x {
 			for j := w[0]; j < w[1]; j++ {
 				huemap[j] = byte(i)
