@@ -24,6 +24,12 @@ const (
 	Default
 )
 
+// For iteration
+const (
+	First = Black
+	Last = White
+)
+
 const (
 	// ASCIIFmt is a format specifer for a ECMA-48 color string
 	ASCIIFmt = "\033[%d;%dm"
@@ -33,17 +39,30 @@ const (
 	ASCIIFmtReset = "\033[%d;%dm%v\033[0m"
 )
 
-// Names is a map of hue strings to color codes
-var Names = map[string]int{
-	"Black":   Black,
-	"Red":     Red,
-	"Green":   Green,
-	"Brown":   Brown,
-	"Blue":    Blue,
-	"Magenta": Magenta,
-	"Cyan":    Cyan,
-	"White":   White,
-	"Default": Default,
+// StringToHue is a map of hue strings to color codes
+var StringToHue = map[string]int{
+	"black":   Black,
+	"blue":    Blue,
+	"brown":   Brown,
+	"cyan":    Cyan,
+	"default": Default,
+	"green":   Green,
+	"magenta": Magenta,
+	"red":     Red,
+	"white":   White,
+}
+
+// HueToString is a map of hue color codes to their names
+var HueToString = map[int]string{
+	Black:   "black",   
+	Blue:    "blue",    
+	Brown:   "brown",   
+	Cyan:    "cyan",    
+	Default: "default", 
+	Green:   "green",   
+	Magenta: "magenta", 
+	Red:     "red",     
+	White:   "white",   
 }
 
 // SetHue sets the Writer's hue
@@ -242,7 +261,13 @@ func (w RegexpWriter) Write(p []byte) (n int, err error) {
 		}
 		n += nb
 	}
-	fmt.Print(ASCIIReset)
+
+	for i := range p {
+		if huemap[i] != 0 {
+			fmt.Print(ASCIIReset)
+			break
+		}
+	}
 
 	return n, err
 }
