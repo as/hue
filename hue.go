@@ -27,7 +27,7 @@ const (
 // For iteration
 const (
 	First = Black
-	Last = White
+	Last  = White
 )
 
 const (
@@ -37,6 +37,10 @@ const (
 	ASCIIReset = "\033[0m"
 	// ASCIIFmtReset is a combination of ASCIIFmt and ASCIIReset with a value is sandwiched in between.
 	ASCIIFmtReset = "\033[%d;%dm%v\033[0m"
+
+	// fmt.Sprintf can't accept arguments in the form fmt.Sprintf("%s %s %s %s", "a", "b", []interface{ "c", "d"}...)
+	// see Encode for the workaround that uses this constant
+	ASCIIFmtFmtReset = "\033[%d;%dm%%v\033[0m"
 )
 
 // StringToHue is a map of hue strings to color codes
@@ -54,15 +58,15 @@ var StringToHue = map[string]int{
 
 // HueToString is a map of hue color codes to their names
 var HueToString = map[int]string{
-	Black:   "black",   
-	Blue:    "blue",    
-	Brown:   "brown",   
-	Cyan:    "cyan",    
-	Default: "default", 
-	Green:   "green",   
-	Magenta: "magenta", 
-	Red:     "red",     
-	White:   "white",   
+	Black:   "black",
+	Blue:    "blue",
+	Brown:   "brown",
+	Cyan:    "cyan",
+	Default: "default",
+	Green:   "green",
+	Magenta: "magenta",
+	Red:     "red",
+	White:   "white",
 }
 
 // SetHue sets the Writer's hue
@@ -142,27 +146,31 @@ func (hs String) Decode() (s string) {
 
 // Encode encapsulates interface a's string representation
 // with the ECMA-40 color codes stored in the hue structure.
-func Encode(h *Hue, a interface{}) String {
-	return String(fmt.Sprintf(ASCIIFmtReset, h.Fg(), h.Bg(), a))
+func Encode(h *Hue, a ...interface{}) String {
+	finalFmt := fmt.Sprintf(ASCIIFmtFmtReset, h.Fg(), h.Bg())
+	return String(fmt.Sprintf(finalFmt, a...))
+
+	//return String(fmt.Sprintf(ASCIIFmtReset, h.Fg(), h.Bg(), a))
 }
+
 // Sprintf behaves like fmt.Sprintf, except it colorizes the output String
-func (h *Hue) Sprintf(format string, a interface{}) String {
-	return String(fmt.Sprintf(string(Encode(h, format)), a))
+func (h *Hue) Sprintf(format string, a ...interface{}) String {
+	return String(fmt.Sprintf(string(Encode(h, format)), a...))
 }
 
 // Printf behaves like fmt.Printf, except it colorizes the output
-func (h *Hue) Printf(format string, a interface{}) {
-	fmt.Printf(string(Encode(h, format)), a)
+func (h *Hue) Printf(format string, a ...interface{}) {
+	fmt.Printf(string(Encode(h, format)), a...)
 }
 
 // Print behaves like fmt.Print, except it colorizes the output
-func (h *Hue) Print(a interface{}) {
-	fmt.Print(Encode(h, a))
+func (h *Hue) Print(a ...interface{}) {
+	fmt.Print(Encode(h, a...))
 }
 
 // Println behaves like fmt.Println, except it colorizes the output
-func (h *Hue) Println(a interface{}) {
-	fmt.Println(Encode(h, a))
+func (h *Hue) Println(a ...interface{}) {
+	fmt.Println(Encode(h, a...))
 }
 
 // RegexpWriter implements colorization for a io.Writer object by processing
