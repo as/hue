@@ -24,7 +24,7 @@ const (
 	Default
 )
 
-// For iteration
+// For iterating through all color codes
 const (
 	First = Black
 	Last  = White
