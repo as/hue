@@ -22,15 +22,15 @@ func TestEncodeDecode(t *testing.T) {
 	 * the result to the original test input.
 	 */
 	for _, u := range testInputs {
-		for _, v := range Names {
-			for _, w := range Names {
+		for i := First; i < Last; i++ {
+			for j := First; j < Last; j++ {
+				h.SetFg(i)
+				h.SetBg(j)
 				hs := Encode(h, u)
 				if u != hs.Decode() {
 					t.Log(fmt.Sprintf("%s != %s", u, hs.Decode()))
 					t.Fail()
 				}
-				h.SetFg(w)
-				h.SetBg(v)
 			}
 		}
 	}
